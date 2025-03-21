@@ -33,7 +33,7 @@ class UserRegisterRequest extends FormRequest
         return [
             'name.required' => 'Name is required',
             'name.max' => 'Name is too long',
-            'email.required' => 'Email addredd is required',
+            'email.required' => 'Email address is required',
             'email.email' => 'Provide a valid email address',
             'password.required'=> 'Password is required',
             'password.confirmed'=> 'Confirmation password has to match',

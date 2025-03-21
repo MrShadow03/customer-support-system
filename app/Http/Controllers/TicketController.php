@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ticket;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
+use Illuminate\Support\Facades\Gate;
 
 class TicketController extends Controller
 {
@@ -25,6 +26,8 @@ class TicketController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreTicketRequest $request) {
+        Gate::authorize("create");
+        
         $ticket = Ticket::create([
             'user_id' => auth()->id(),
             'subject' => $request->input('subject'),
@@ -44,50 +47,39 @@ class TicketController extends Controller
      * Display the specified resource.
      */
     public function show(Ticket $ticket) {
-        if (auth()->user()->hasRole('admin') || $ticket->user_id === auth()->id()) {
-            return response()->json([
-                'message' => 'Ticket retrieved successfully.',
-                'ticket' => $ticket,
-            ]);
-        };
+        Gate::authorize('view', $ticket);
 
         return response()->json([
-            'message' => 'You are not authorized to view this ticket.',
-        ], 403);
+            'message' => 'Ticket retrieved successfully.',
+            'ticket' => $ticket,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateTicketRequest $request, Ticket $ticket) {
-        if (auth()->user()->hasRole('admin') || $ticket->user_id === auth()->id()) {
-            $ticket->update($request->validated());
-    
-            return response()->json([
-                'message' => 'Ticket updated successfully.',
-                'ticket' => $ticket,
-            ]);
-        }
-    
+        Gate::authorize('update', $ticket);
+
+        $ticket->update($request->validated());
+
         return response()->json([
-            'message' => 'You are not authorized to update this ticket.',
-        ], 403);
+            'message' => 'Ticket updated successfully.',
+            'ticket' => $ticket,
+        ]);
+ 
     }
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Ticket $ticket) {
-        if (auth()->user()->hasRole('admin') || $ticket->user_id === auth()->id()) {
-            $ticket->delete();
-    
-            return response()->json([
-                'message' => 'Ticket deleted successfully.',
-            ]);
-        }
-    
+        Gate::authorize('delete', $ticket);
+
+        $ticket->delete();
+
         return response()->json([
-            'message' => 'You are not authorized to delete this ticket.',
-        ], 403);
+            'message' => 'Ticket deleted successfully.',
+        ]);
     }
 }

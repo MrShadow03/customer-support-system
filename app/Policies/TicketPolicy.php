@@ -9,58 +9,34 @@ use Illuminate\Auth\Access\Response;
 class TicketPolicy
 {
     /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
-        return false;
-    }
-
-    /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Ticket $ticket): bool
+    public function view(User $user, Ticket $ticket)
     {
-        return false;
+        return $user->hasRole("admin") || $user->id === $ticket->user_id ? Response::allow() : Response::deny("You do not own this ticket.");
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user)
     {
-        return false;
+        return $user->hasRole("customer") ? Response::allow() : Response::deny("You are not authorized to create a ticket.");
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Ticket $ticket): bool
+    public function update(User $user, Ticket $ticket)
     {
-        return false;
+        return $user->hasRole("admin") || $user->id === $ticket->user_id ? Response::allow() : Response::deny("You are not authorized to create a ticket.");;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Ticket $ticket): bool
+    public function delete(User $user, Ticket $ticket)
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Ticket $ticket): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Ticket $ticket): bool
-    {
-        return false;
+        return $user->hasRole("admin") || $user->id === $ticket->user_id ? Response::allow() : Response::deny("You are not authorized to create a ticket.");;
     }
 }
