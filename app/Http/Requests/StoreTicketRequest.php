@@ -13,7 +13,6 @@ class StoreTicketRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        dd(auth()->check());
         return auth()->check() && auth()->user()->hasRole('customer');
         // return true;
     }

@@ -11,16 +11,20 @@ class TicketController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        return Ticket::all();
+    public function index() {
+        $tickets = Ticket::all();
+
+        if (auth()->user()->hasRole("customer")) {
+            $tickets = auth()->user()->tickets;
+        }
+
+        return $tickets;
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTicketRequest $request)
-    {
+    public function store(StoreTicketRequest $request) {
         $ticket = Ticket::create([
             'user_id' => auth()->id(),
             'subject' => $request->input('subject'),
@@ -39,24 +43,51 @@ class TicketController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Ticket $ticket)
-    {
-        return $ticket;
+    public function show(Ticket $ticket) {
+        if (auth()->user()->hasRole('admin') || $ticket->user_id === auth()->id()) {
+            return response()->json([
+                'message' => 'Ticket retrieved successfully.',
+                'ticket' => $ticket,
+            ]);
+        };
+
+        return response()->json([
+            'message' => 'You are not authorized to view this ticket.',
+        ], 403);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTicketRequest $request, Ticket $ticket)
-    {
-        //
+    public function update(UpdateTicketRequest $request, Ticket $ticket) {
+        if (auth()->user()->hasRole('admin') || $ticket->user_id === auth()->id()) {
+            $ticket->update($request->validated());
+    
+            return response()->json([
+                'message' => 'Ticket updated successfully.',
+                'ticket' => $ticket,
+            ]);
+        }
+    
+        return response()->json([
+            'message' => 'You are not authorized to update this ticket.',
+        ], 403);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Ticket $ticket)
-    {
-        //
+    public function destroy(Ticket $ticket) {
+        if (auth()->user()->hasRole('admin') || $ticket->user_id === auth()->id()) {
+            $ticket->delete();
+    
+            return response()->json([
+                'message' => 'Ticket deleted successfully.',
+            ]);
+        }
+    
+        return response()->json([
+            'message' => 'You are not authorized to delete this ticket.',
+        ], 403);
     }
 }

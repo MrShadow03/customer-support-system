@@ -18,4 +18,8 @@ class Ticket extends Model
         "attachment",
         "status"
     ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }
