@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewMessageCreated;
 use App\Models\ChatMessage;
 use App\Http\Requests\StoreChatMessageRequest;
 use App\Http\Requests\UpdateChatMessageRequest;
@@ -29,6 +30,8 @@ class ChatMessageController extends Controller
             "ticket_id"=> $ticket->id,
             "message" => $request->message,
         ]);
+
+        broadcast(new NewMessageCreated($message));
 
         return response()->json([
             "message"=> "Message sent successfully",
