@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ticket;
 use App\Models\Comment;
+use Illuminate\Support\Facades\Gate;
+use App\Http\Resources\CommentResource;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 
@@ -11,17 +14,28 @@ class CommentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Ticket $ticket)
     {
-        //
+        $comments = $ticket->comments()->latest()->get();
+
+        return CommentResource::collection($comments);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCommentRequest $request)
-    {
-        //
+    public function store(Ticket $ticket, StoreCommentRequest $request)
+    {        
+        $comment = Comment::create([
+            'user_id' => auth()->id(),
+            'ticket_id'=> $ticket->id,
+            'comment' => $request->input('comment'),
+        ]);
+
+        return response()->json([
+            'message' => 'comment created successfully.',
+            'comment' => $comment,
+        ], 201);
     }
 
     /**

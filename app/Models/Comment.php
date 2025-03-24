@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    /** @use HasFactory<\Database\Factories\CommentFactory> */
     use HasFactory;
+
+    protected $fillable = ['user_id', 'ticket_id', 'comment'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function ticket()
+    {
+        return $this->belongsTo(Ticket::class);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\ChatMessage;
+use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
@@ -19,17 +20,17 @@ class ChatMessagePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, ChatMessage $chatMessage): bool
+    public function view(User $user, Ticket $ticket): bool
     {
-        return false;
+        return $user->hasRole("admin") ||$user->id === $ticket->user_id;
     }
 
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User $user, Ticket $ticket): bool
     {
-        return false;
+        return $user->hasRole("admin") || $user->id === $ticket->user_id;
     }
 
     /**

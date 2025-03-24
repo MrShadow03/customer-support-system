@@ -11,7 +11,7 @@ class StoreChatMessageRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check();
     }
 
     /**
@@ -22,7 +22,19 @@ class StoreChatMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'message' => 'required|string',
+        ];
+    }
+
+    /**
+     * Custom error messages for validation.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'message.required' => 'Type a message to send',
         ];
     }
 }

@@ -3,22 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ticket;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
-use Illuminate\Support\Facades\Gate;
+use App\Http\Resources\ChatMessagesResource;
 
 class TicketController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index() {
-        $tickets = Ticket::all();
-
+    public function index()
+    {
+        $query = Ticket::query();
+    
         if (auth()->user()->hasRole("customer")) {
-            $tickets = auth()->user()->tickets;
+            $query = auth()->user()->tickets();
         }
-
+    
+        $tickets = $query->with('user')->latest()->paginate(5);
+    
+        $tickets->getCollection()->transform(function($ticket) {
+            $ticket->user_name = $ticket->user ? $ticket->user->name : null;
+            return $ticket;
+        });
+    
         return $tickets;
     }
 
@@ -26,7 +35,7 @@ class TicketController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreTicketRequest $request) {
-        Gate::authorize("create");
+        Gate::authorize("create", Ticket::class);
         
         $ticket = Ticket::create([
             'user_id' => auth()->id(),
@@ -52,6 +61,8 @@ class TicketController extends Controller
         return response()->json([
             'message' => 'Ticket retrieved successfully.',
             'ticket' => $ticket,
+            'user' => $ticket->user,
+            'chatMessages' => ChatMessagesResource::collection($ticket->chatMessages)
         ]);
     }
 
